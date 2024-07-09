@@ -1,0 +1,20 @@
+---
+- name: Log into private registry and force re-authorization
+  docker_login:
+    registry: '{{ base.docker_registry.address }}'
+    username: '{{ base.docker_registry.username }}'
+    password: '{{ base.docker_registry.password }}'
+    reauthorize: yes
+  when:
+    - base.docker_registry.credentials
+
+- name: Rendering daemon.json
+  template:
+    src: templates/daemon.j2
+    dest: '/etc/docker/daemon.json'
+
+- name: restart and enable docker
+  service:
+    name: docker
+    state: restarted
+    enabled: yes

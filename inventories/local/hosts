@@ -1,0 +1,6 @@
+localhost ansible_host=localhost
+
+
+# Role: base
+[docker_registry]
+localhost

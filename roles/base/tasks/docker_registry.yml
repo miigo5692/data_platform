@@ -1,0 +1,38 @@
+---
+- name: 'Create sub-dir in {{ directories["data"] }} for docker-registry'
+  file:
+    path: '{{ directories["data"] }}/docker_registry'
+    state: directory
+
+- name: 'Create sub-dir in {{ directories["config"] }} for docker-registry'
+  file:
+    path: '{{ directories["config"] }}/docker_registry'
+    state: directory
+
+- name: Push public/private-key certificate
+  copy:
+    src: 'certs/{{ item }}'
+    dest: '{{ directories.config }}/docker_registry'
+    group: 'docker'
+  loop:
+    - docker.cert
+    - docker.key
+
+- name: Rendering docker-registry config file into config directory
+  template:
+    src: templates/config.j2
+    dest: '{{ directories.config }}/docker_registry/config.yml'
+
+- name: Create docker registry container
+  docker_container:
+    name: docker_registry
+    recreate: yes
+    force_kill: yes
+    image: '{{ container_images["docker_registry"] }}:{{ versions["docker_registry"] }}'
+    restart_policy: always
+    network_mode: host
+    volumes:
+      - '{{ directories["data"] }}/docker_registry:/var/lib/registry'
+      - '{{ directories["config"] }}/docker_registry/docker.cert:/etc/registry/docker.cert'
+      - '{{ directories["config"] }}/docker_registry/docker.key:/etc/registry/docker.key'
+      - '{{ directories.config }}/docker_registry/config.yml:/etc/docker/registry/config.yml'

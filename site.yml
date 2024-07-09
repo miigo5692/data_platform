@@ -1,0 +1,10 @@
+---
+# master playbook
+- name: provision base configuration
+  hosts: all
+  become: yes
+  gather_facts: yes
+  tags:
+    - base
+  roles:
+    - base

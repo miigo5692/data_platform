@@ -1,0 +1,57 @@
+---
+- name: Install docker dependencies
+  yum:
+    name: '{{ item }}'
+    state: installed
+  loop: ['yum-utils', 'device-mapper-persistent-data', 'lvm2']
+
+- name: Copy docker rpm file
+  copy:
+    src: 'files/docker-ce-{{ versions["docker"] }}.ce-1.el7.centos.x86_64.rpm'
+    dest: '{{ directories["tmp"] }}/docker-ce-{{ versions["docker"] }}.ce-1.el7.centos.x86_64.rpm'
+
+- name: 'Install docker {{ versions["docker"] }}'
+  yum:
+    name: '{{ directories["tmp"] }}/docker-ce-{{ versions["docker"] }}.ce-1.el7.centos.x86_64.rpm'
+    state: present
+
+- name: Create docker certs.d directory
+  file:
+    path: '/etc/docker/certs.d/{{ groups["docker_registry"][0] }}:5000'
+    state: directory
+
+- name: Copy docker-registry certificate for docker daemon
+  copy:
+    src: 'certs/{{ item }}'
+    dest: '/etc/docker/certs.d/{{ groups["docker_registry"][0] }}:5000/{{ item }}'
+    group: docker
+  loop:
+    - docker.cert
+    - docker.key
+    - ca.crt
+
+- name: Ensure that /etc/systemd/system/docker.service.d exists
+  file:
+    path: '/etc/systemd/system/docker.service.d'
+    state: directory
+
+- name: Render proxy settings for docker
+  template:
+    src: http-proxy.conf.j2
+    dest: '/etc/systemd/system/docker.service.d/http-proxy.conf'
+    mode: '0775'
+  when:
+    - '"proxy" in base'
+    - '"http" in base.proxy or "https" in base.proxy'
+
+- name: Start and enable docker
+  service:
+    name: docker
+    state: started
+    enabled: yes
+
+- name: 'Add {{ ansible_user }} to docker group'
+  user:
+    name: '{{ ansible_user }}'
+    group: docker
+    append: yes

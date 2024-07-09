@@ -1,0 +1,29 @@
+---
+- name: Install python and dependencies
+  yum:
+    name: '{{ item }}'
+    state: installed
+  loop: ['epel-release', 'gcc', 'wget', 'zlib', 'zlib-devel', 'openssl', 'openssl-devel',
+         'python36', 'python36-libs', 'python36-devel', 'python36-pip', 'python-pip', 'python-psycopg2']
+
+- name: Install required python packages
+  pip:
+    name: '{{ item }}'
+    state: present
+  loop:
+    - docker
+    - pyOpenSSL
+    - pexpect==3.3
+  when: '"proxy" not in base'
+
+- name: Install required python packages with proxy
+  pip:
+    name: '{{ item }}'
+    state: present
+    extra_args: '--trusted-host pypi.python.org --trusted-host pypi.org --trusted-host files.pythonhosted.org'
+  loop:
+    - docker
+    - pyOpenSSL
+  when:
+    - '"proxy" in base'
+    - '"http" in base.proxy or "https" in base.proxy'

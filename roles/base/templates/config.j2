@@ -1,0 +1,18 @@
+version: 0.1
+storage:
+  cache:
+    blobdescriptor: inmemory
+  filesystem:
+    rootdirectory: /var/lib/registry
+http:
+  addr: :5000
+  tls:
+    certificate: /etc/registry/docker.cert
+    key: /etc/registry/docker.key
+  headers:
+    X-Content-Type-Options: [nosniff]
+  debug:
+    addr: :5100
+    prometheus:
+      enabled: true
+      path: /metrics

@@ -1,0 +1,19 @@
+---
+- name: Install ca-certificate package
+  yum:
+    name: ca-certificates
+    state: latest
+
+- name: Download proxy root certificate
+  get_url:
+    url: "{{ base.proxy.root_certificate }}"
+    dest: "/etc/ssl/certs/{{ base.proxy.root_certificate | basename }}"
+
+- name: Create softlink to /etc/pki/ca-trust/source/anchors/
+  file:
+    src: "/etc/ssl/certs/{{ base.proxy.root_certificate | basename }}"
+    dest: "/etc/pki/ca-trust/source/anchors/{{ base.proxy.root_certificate | basename }}"
+    state: link
+
+- name: Run update_ca_trust
+  command: update-ca-trust

@@ -1,0 +1,10 @@
+---
+- name: 'Create data directory in {{ directories["data"] }}'
+  file:
+    path: '{{ directories["data"] }}'
+    state: directory
+
+- name: 'Create config directory in {{ directories["config"] }}'
+  file:
+    path: '{{ directories["config"] }}'
+    state: directory

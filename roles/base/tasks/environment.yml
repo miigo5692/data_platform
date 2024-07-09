@@ -1,0 +1,15 @@
+---
+- name: Set proxy settings system-wide in /etc/profile
+  lineinfile:
+    path: /etc/profile
+    state: present
+    line: '{{ item }}'
+  loop:
+    - 'export HTTP_PROXY={{ base.proxy.http }}'
+    - 'export HTTPS_PROXY={{ base.proxy.https }}'
+    - 'export NO_PROXY={% for node in groups["all"] %}{{ node }}{% if loop.last %}{% else %},{% endif %}{% endfor %}{% if "no_proxy" in base.proxy %},{{ base.proxy.no_proxy }}{% endif %}' # noqa 204
+    - 'export http_proxy=$HTTP_PROXY'
+    - 'export https_proxy=$HTTPS_PROXY'
+    - 'export no_proxy=$NO_POXY'
+  when:
+    - '"proxy" in base'

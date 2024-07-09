@@ -1,0 +1,4 @@
+[Service]
+{% if 'http' in base.proxy %}Environment="HTTP_PROXY={{ base.proxy.http }}"{% endif %}
+{% if 'https' in base.proxy %}Environment="HTTPS_PROXY={{ base.proxy.https }}"{% endif %}
+Environment="NO_PROXY={% for node in groups['all'] %}{{ node }}{% if loop.last %}{% else %},{% endif %}{% endfor %}{% if 'no_proxy' in base.proxy %},{{ base.proxy.no_proxy }}{% endif %}"

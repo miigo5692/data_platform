@@ -1,0 +1,7 @@
+---
+- name: Start NTP daemon
+  service:
+   name: ntpd
+   state: restarted
+   enabled: yes
+  listen: start ntp

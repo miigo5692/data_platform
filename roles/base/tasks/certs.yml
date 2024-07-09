@@ -1,0 +1,44 @@
+---
+- name: Ensure directory exists for local self-signed TLS certs
+  file:
+    path: '{{ directories.certs }}'
+    state: directory
+  run_once: yes
+
+- name: Generate an OpenSSL private key
+  openssl_privatekey:
+    path: '{{ directories.certs }}/docker.key'
+  run_once: yes
+
+- name: Generate an OpenSSL CSR
+  openssl_csr:
+    path: '{{ directories.certs }}/docker.csr'
+    privatekey_path: '{{ directories.certs }}/docker.key'
+    common_name: '{{ groups["docker_registry"][0] }}'
+  run_once: yes
+
+- name: Generate a Self Signed OpenSSL certificate
+  openssl_certificate:
+    path: '{{ directories.certs }}/docker.cert'
+    privatekey_path: '{{ directories.certs }}/docker.key'
+    csr_path: '{{ directories.certs }}/docker.csr'
+    provider: selfsigned
+  run_once: yes
+
+- name: Create CA cert
+  copy:
+    src: '{{ directories.certs }}/docker.cert'
+    dest: '{{ directories.certs }}/ca.crt'
+    remote_src: yes
+  run_once: yes
+
+- name: Fetch public/private-key certificate
+  fetch:
+    src: '{{ directories.certs }}/{{ item }}'
+    dest: 'certs/{{ item }}'
+    flat: yes
+  run_once: yes
+  loop:
+    - docker.cert
+    - docker.key
+    - ca.crt
