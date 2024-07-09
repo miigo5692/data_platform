@@ -1,10 +1,8 @@
 ---
 # master playbook
 - name: provision base configuration
-  hosts: all
+  hosts: localhost
   become: yes
   gather_facts: yes
-  tags:
-    - base
   roles:
     - base
