@@ -1,0 +1,45 @@
+---
+- name: Include environment tasks
+  include_tasks: environment.yml
+  when:
+    - '"proxy" in base'
+    - '"root_certificate" in base.proxy'
+    - 'base.proxy.root_certificate'
+
+- name: Include Python tasks
+  include_tasks: python.yml
+
+- name: Include hostname tasks
+  include_tasks: hostname.yml
+  when:
+    - '"hostname" in base'
+    - 'base.hostname'
+
+- name: Include ntp tasks
+  include_tasks: ntp.yml
+  when:
+    - '"ntp" in base'
+    - 'base.ntp'
+
+- name: Include filesystem tasks
+  include_tasks: filesystem.yml
+
+- name: Include security tasks
+  include_tasks: security.yml
+  when:
+    - '"disable_security" in base'
+    - 'base.disable_Security'
+
+- name: Include certificate tasks
+  include_tasks: certs.yml
+
+- name: Include docker tasks
+  include_tasks: docker.yml
+
+- name: Include custom-docker_registry tasks
+  include_tasks: custom-docker_registry.yml
+  when: 'base.docker_registry.enabled'
+
+- name: Include docker_registry tasks
+  include_tasks: docker_registry.yml
+  when: inventory_hostname in groups['docker_registry']
